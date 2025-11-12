@@ -1,0 +1,8 @@
+{
+  "name": "{Deployment} Logos Vision - 11/11/25",
+  "description": "A CRM for non-profit consulting and project management, featuring client, project, and task tracking with AI-powered project summaries.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation"
+  ]
+}
