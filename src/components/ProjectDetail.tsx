@@ -9,6 +9,8 @@ import { getDeadlineStatus } from '../utils/dateHelpers';
 import { AiEnhancedTextarea } from './AiEnhancedTextarea';
 // FIX: Corrected the import path for the Breadcrumbs component.
 import { Breadcrumbs } from './ui/Breadcrumbs';
+// FIX: Import missing icon components.
+import { ClockIcon, SparklesIcon, ShieldExclamationIcon, ShieldCheckIconSolid, ShieldExclamationIconSolid, NoteIcon, SoundWaveIcon, PlayIcon } from './icons';
 
 const StatusBadge: React.FC<{ status: ProjectStatus | TaskStatus }> = ({ status }) => {
   const colors = {

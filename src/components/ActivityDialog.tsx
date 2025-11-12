@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import type { Activity, Client, Project } from '../types';
 import { ActivityType, ActivityStatus } from '../types';

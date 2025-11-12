@@ -50,6 +50,11 @@ import { GrantAssistant } from '../components/GrantAssistant';
 import { GuidedTour } from '../components/GuidedTour';
 import type { TourStep } from '../components/GuidedTour';
 import { ToastProvider, useToast } from './components/ui/Toast';
+import { CommandPalette, type Command } from './components/ui/CommandPalette';
+import { KeyboardShortcuts } from './components/ui/KeyboardShortcuts';
+import { allNavItems } from '../components/navigationConfig';
+// FIX: Import missing icons used in command palette commands.
+import { PlusIcon, MoonIcon, SunIcon, QuestionMarkCircleIcon } from '../components/icons';
 
 const AppContent: React.FC = () => {
   const { showToast } = useToast();
@@ -114,6 +119,10 @@ const AppContent: React.FC = () => {
 
   // Guided Tour State
   const [isTourOpen, setIsTourOpen] = useState(false);
+  
+  // Command Palette State
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 
   useEffect(() => {
       const layouts = portalDbService.getLayouts();
@@ -152,6 +161,21 @@ const AppContent: React.FC = () => {
     }
     
     setNotifications(newNotifications);
+  }, []);
+  
+  // Keyboard shortcuts for Command Palette and Help
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(prev => !prev);
+      } else if (e.key === '?') {
+        e.preventDefault();
+        setIsShortcutsOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const trackRecentlyViewed = useCallback((item: RecentItem) => {
@@ -575,6 +599,21 @@ const AppContent: React.FC = () => {
       { selector: '#tour-start-button', title: 'Help & Tour', content: 'You can restart this tour anytime by clicking this button.', position: 'left' }
   ];
 
+  const commands: Command[] = [
+    ...allNavItems.map(item => ({
+      id: `nav-${item.pageId}`,
+      title: `Go to ${item.label}`,
+      category: 'Navigation',
+      action: () => navigateToPage(item.pageId),
+      icon: item.icon
+    })),
+    { id: 'action-log-activity', title: 'Log New Activity', category: 'Actions', action: () => setIsActivityDialogOpen(true), icon: <PlusIcon /> },
+    { id: 'action-new-case', title: 'Create New Case', category: 'Actions', action: handleAddCase, icon: <PlusIcon /> },
+    { id: 'action-add-contact', title: 'Add New Contact', category: 'Actions', action: () => setIsAddContactDialogOpen(true), icon: <PlusIcon /> },
+    { id: 'action-add-team', title: 'Add New Team Member', category: 'Actions', action: () => setIsAddTeamMemberDialogOpen(true), icon: <PlusIcon /> },
+    { id: 'app-toggle-theme', title: 'Toggle Theme', category: 'Application', action: toggleTheme, icon: theme === 'light' ? <MoonIcon /> : <SunIcon /> },
+    { id: 'app-start-tour', title: 'Start Guided Tour', category: 'Application', action: () => setIsTourOpen(true), icon: <QuestionMarkCircleIcon /> },
+  ];
   
   const renderContent = () => {
     if (currentPage === 'projects' && selectedProjectId) {
@@ -877,6 +916,15 @@ const AppContent: React.FC = () => {
             steps={tourSteps}
             isOpen={isTourOpen}
             onClose={() => setIsTourOpen(false)}
+        />
+        <CommandPalette 
+            commands={commands}
+            isOpen={isCommandPaletteOpen}
+            onClose={() => setIsCommandPaletteOpen(false)}
+        />
+        <KeyboardShortcuts 
+            isOpen={isShortcutsOpen}
+            onClose={() => setIsShortcutsOpen(false)}
         />
     </div>
   );

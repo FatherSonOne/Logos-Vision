@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SearchIcon } from '../icons';
 
@@ -19,6 +20,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ commands, isOpen
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -45,6 +47,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ commands, isOpen
     return acc;
   }, {} as Record<string, Command[]>);
 
+  useEffect(() => {
+    // Scroll active item into view
+    const activeItem = listRef.current?.querySelector(`[data-index="${activeIndex}"]`);
+    activeItem?.scrollIntoView({ block: 'nearest' });
+  }, [activeIndex]);
+
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -59,6 +67,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ commands, isOpen
         command.action();
         onClose();
       }
+    } else if (e.key === 'Escape') {
+      onClose();
     }
   }, [activeIndex, filteredCommands, onClose]);
 
@@ -91,11 +101,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ commands, isOpen
           {Object.entries(groupedCommands).length > 0 ? Object.entries(groupedCommands).map(([category, cmds]: [string, Command[]]) => (
             <div key={category}>
               <h3 className="px-3 py-1 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">{category}</h3>
-              <ul>
+              <ul ref={listRef}>
                 {cmds.map(cmd => {
                     const index = filteredCommands.findIndex(c => c.id === cmd.id);
                     return (
-                        <li key={cmd.id}>
+                        <li key={cmd.id} data-index={index}>
                             <button
                                 onClick={() => { cmd.action(); onClose(); }}
                                 className={`w-full text-left p-3 rounded-md flex items-center gap-3 text-sm ${activeIndex === index ? 'bg-cyan-500 text-white' : 'hover:bg-white/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'}`}

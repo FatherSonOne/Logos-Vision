@@ -1,8 +1,8 @@
-
 import React from 'react';
 import type { Project } from '../../types';
 import { ProjectStatus, TaskStatus } from '../../types';
 import { getDeadlineStatus } from '../../utils/dateHelpers';
+// FIX: Import StatusBadge and getStatusVariant from the correct location.
 import { StatusBadge, getStatusVariant } from '../ui/StatusBadge';
 import { ClockIcon } from '../icons';
 
@@ -24,6 +24,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, clientName, o
             <div>
                 <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">{project.name}</h3>
+                    {/* FIX: Use label and variant props for StatusBadge */}
                     <StatusBadge label={project.status} variant={getStatusVariant(project.status)} />
                 </div>
                 <p className="text-sm text-cyan-800 font-medium mb-3 dark:text-cyan-300">{clientName}</p>

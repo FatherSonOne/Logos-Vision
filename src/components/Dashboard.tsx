@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import type { Project, Client, Activity, Page, TeamMember, Case, EnrichedTask, RecentItem } from '../types';
 import { ProjectStatus, ActivityType, ActivityStatus, TaskStatus } from '../types';

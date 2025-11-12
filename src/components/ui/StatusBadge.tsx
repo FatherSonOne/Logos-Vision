@@ -1,39 +1,74 @@
-import React from 'react';
-import { ProjectStatus, TaskStatus, CaseStatus, ActivityStatus } from '../../types';
 
-type StatusType = ProjectStatus | TaskStatus | CaseStatus | ActivityStatus;
+import React from 'react';
+import { ProjectStatus, TaskStatus, CaseStatus, ActivityStatus, WebpageStatus, CasePriority } from '../../types';
+
+export type BadgeVariant = 'success' | 'warning' | 'error' | 'info' | 'neutral' | 'purple' | 'pink';
 
 interface StatusBadgeProps {
-  status: StatusType;
+  label: string;
+  variant: BadgeVariant;
+  className?: string;
+  icon?: React.ReactNode;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  // FIX: The original object had duplicate keys because different enums (e.g., ProjectStatus.InProgress, CaseStatus.InProgress)
-  // resolved to the same string value ('In Progress'), which is not allowed in an object literal.
-  // The conflicting/duplicate keys have been removed to resolve the error. A single style is now used for each status string.
-  const colors: Record<string, string> = {
-    // Project Statuses
-    [ProjectStatus.Planning]: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-    [ProjectStatus.InProgress]: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-    [ProjectStatus.Completed]: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300',
-    [ProjectStatus.OnHold]: 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300',
-    // Task Statuses
-    [TaskStatus.ToDo]: 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200',
-    [TaskStatus.Done]: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300',
-    // Case Statuses
-    [CaseStatus.New]: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-    [CaseStatus.Resolved]: 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300',
-    [CaseStatus.Closed]: 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-300',
-    // Activity Statuses
-    [ActivityStatus.Scheduled]: 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
-    [ActivityStatus.Cancelled]: 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300',
+export const getStatusVariant = (status: string): BadgeVariant => {
+    switch (status) {
+        // Success
+        case ProjectStatus.Completed:
+        case TaskStatus.Done:
+        case CaseStatus.Resolved:
+        case ActivityStatus.Completed:
+        case WebpageStatus.Published:
+            return 'success';
+
+        // Warning
+        case ProjectStatus.OnHold:
+        case CasePriority.Medium:
+            return 'warning';
+        
+        // Error / Pink
+        case CasePriority.High:
+            return 'pink';
+
+        // Info
+        case ProjectStatus.InProgress:
+        case TaskStatus.InProgress:
+        case CaseStatus.InProgress:
+        case CaseStatus.New:
+        case ActivityStatus.Scheduled:
+            return 'info';
+        
+        // Purple
+        case ProjectStatus.Planning:
+            return 'purple';
+
+        // Neutral
+        case TaskStatus.ToDo:
+        case CaseStatus.Closed:
+        case WebpageStatus.Draft:
+        case WebpageStatus.Archived:
+        case ActivityStatus.Cancelled:
+        case CasePriority.Low:
+        default:
+            return 'neutral';
+    }
+};
+
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ label, variant, className, icon }) => {
+  const variantClasses: Record<BadgeVariant, string> = {
+    success: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+    warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400',
+    error: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400',
+    info: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+    neutral: 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-300',
+    purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
+    pink: 'bg-pink-100 text-pink-800 dark:bg-pink-900/50 dark:text-pink-300',
   };
 
-  const colorClass = colors[status] || 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-300';
-  
   return (
-    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${colorClass}`}>
-      {status}
+    <span className={`px-2 py-1 text-xs font-semibold rounded-full inline-flex items-center gap-1.5 ${variantClasses[variant]} ${className}`}>
+      {icon}
+      {label}
     </span>
   );
 };

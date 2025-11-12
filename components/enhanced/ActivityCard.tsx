@@ -1,7 +1,7 @@
-
 import React from 'react';
 import type { Activity } from '../../types';
 import { ActivityType } from '../../types';
+// FIX: Import getStatusVariant to determine the badge variant dynamically.
 import { StatusBadge, getStatusVariant } from '../ui/StatusBadge';
 import { PhoneIcon, MailIcon, UsersIcon, DocumentTextIcon, PencilIcon, TrashIcon } from '../icons';
 
@@ -47,6 +47,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, clientName
                         Logged by {teamMemberName} on {new Date(activity.activityDate).toLocaleDateString()}
                     </p>
                 </div>
+                {/* FIX: Correctly pass `label` and `variant` props to StatusBadge. */}
                 <StatusBadge label={activity.status} variant={getStatusVariant(activity.status)} />
             </div>
 

@@ -1,3 +1,4 @@
+
 // This component reuses a lot of the logic from ContactsMap, but is specialized for volunteers.
 // It shows clients and volunteers, and can draw lines between them.
 
