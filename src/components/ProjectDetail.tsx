@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import type { Project, Client, TeamMember, Task, Case } from '../types';
 import { ProjectStatus, TaskStatus } from '../types';
@@ -7,29 +8,12 @@ import { TaskTimeline } from './TaskTimeline';
 import { decodeAudioData, decode } from '../utils/audio';
 import { getDeadlineStatus } from '../utils/dateHelpers';
 import { AiEnhancedTextarea } from './AiEnhancedTextarea';
-// FIX: Corrected the import path for the Breadcrumbs component.
+// FIX: Corrected import path for Breadcrumbs and added StatusBadge imports.
 import { Breadcrumbs } from './ui/Breadcrumbs';
-// FIX: Import missing icon components.
+import { StatusBadge, getStatusVariant } from './ui/StatusBadge';
 import { ClockIcon, SparklesIcon, ShieldExclamationIcon, ShieldCheckIconSolid, ShieldExclamationIconSolid, NoteIcon, SoundWaveIcon, PlayIcon } from './icons';
-
-const StatusBadge: React.FC<{ status: ProjectStatus | TaskStatus }> = ({ status }) => {
-  const colors = {
-    // Project Statuses
-    [ProjectStatus.Planning]: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-    [ProjectStatus.InProgress]: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-    [ProjectStatus.Completed]: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300',
-    [ProjectStatus.OnHold]: 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300',
-    // Task Statuses
-    [TaskStatus.ToDo]: 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-300',
-    [TaskStatus.Done]: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300',
-  };
-  
-  return (
-    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${colors[status]}`}>
-      {status}
-    </span>
-  );
-};
+import { InlineEdit } from './editing/InlineEdit';
+import { InlineSelect } from './editing/InlineSelect';
 
 interface ProjectDetailProps {
   project: Project;
@@ -39,9 +23,10 @@ interface ProjectDetailProps {
   cases: Case[];
   onBack: () => void;
   onUpdateTaskNote: (projectId: string, taskId: string, notes: string) => void;
+  onUpdateField: (projectId: string, field: keyof Project, value: any) => void;
 }
 
-export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, client, projectTeamMembers, allTeamMembers, cases, onBack, onUpdateTaskNote }) => {
+export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, client, projectTeamMembers, allTeamMembers, cases, onBack, onUpdateTaskNote, onUpdateField }) => {
     const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
     const [aiSummary, setAiSummary] = useState('');
     const [summarySources, setSummarySources] = useState<any[]>([]);
@@ -54,6 +39,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, client, p
     const [isAnalyzingRisk, setIsAnalyzingRisk] = useState(false);
 
     const projectDeadline = getDeadlineStatus(project.endDate, project.status === ProjectStatus.Completed);
+
+    const statusOptions = Object.values(ProjectStatus).map(s => ({ value: s, label: s }));
 
     const handleNoteToggle = (taskId: string, existingNote?: string) => {
         if (activeNoteTaskId === taskId) {
@@ -155,12 +142,20 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, client, p
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between sm:items-start border-b border-white/20 pb-6 mb-6">
                     <div>
-                        <h2 className="text-3xl font-bold text-slate-900 mb-2 dark:text-slate-100">{project.name}</h2>
+                        <InlineEdit
+                            value={project.name}
+                            onSave={(newValue) => onUpdateField(project.id, 'name', newValue)}
+                            className="text-3xl font-bold text-slate-900 mb-2 dark:text-slate-100"
+                        />
                         <p className="text-md text-slate-600 dark:text-slate-300">for <span className="font-semibold text-cyan-600 dark:text-cyan-400">{client?.name || 'Unknown Client'}</span></p>
                     </div>
-                    <div className="mt-4 sm:mt-0 flex-shrink-0 text-right">
-                        <StatusBadge status={project.status} />
-                        <p className={`flex items-center justify-end gap-1 font-semibold mt-2 text-sm ${projectDeadline.color}`}>
+                    <div className="mt-4 sm:mt-0 flex-shrink-0 text-right space-y-2">
+                        <InlineSelect
+                            value={project.status}
+                            options={statusOptions}
+                            onSave={(newStatus) => onUpdateField(project.id, 'status', newStatus as ProjectStatus)}
+                        />
+                        <p className={`flex items-center justify-end gap-1 font-semibold text-sm ${projectDeadline.color}`}>
                             <ClockIcon />
                             {projectDeadline.text}
                         </p>
@@ -183,7 +178,12 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, client, p
                     {/* Left Column: Details */}
                     <div className="lg:col-span-2">
                         <h3 className="text-lg font-semibold text-slate-800 mb-3 dark:text-slate-200">Project Description</h3>
-                        <p className="text-slate-600 mb-6 dark:text-slate-300">{project.description}</p>
+                        <InlineEdit
+                            value={project.description || ''}
+                            onSave={(newValue) => onUpdateField(project.id, 'description', newValue)}
+                            className="text-slate-600 mb-6 dark:text-slate-300"
+                            multiline
+                        />
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                             <div>
@@ -298,7 +298,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, client, p
                                         <div className="flex items-center space-x-4 text-sm flex-shrink-0 self-end sm:self-center">
                                             <span className="text-slate-500 dark:text-slate-400">{allTeamMembers.find(c => c.id === task.teamMemberId)?.name || 'N/A'}</span>
                                             <span className={`${taskDeadline.color}`}>{new Date(task.dueDate).toLocaleDateString()}</span>
-                                            <StatusBadge status={task.status} />
+                                            {/* FIX: Use label and variant props for StatusBadge */}
+                                            <StatusBadge label={task.status} variant={getStatusVariant(task.status)} />
                                             <button onClick={() => handleNoteToggle(task.id, task.notes)} className="text-slate-500 hover:text-cyan-600 dark:text-slate-400 dark:hover:text-cyan-400" title={task.notes ? "View/Edit Note" : "Add Note"}>
                                                 <NoteIcon hasNote={!!task.notes} />
                                             </button>

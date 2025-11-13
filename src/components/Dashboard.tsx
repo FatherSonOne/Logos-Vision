@@ -1,38 +1,25 @@
+
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import type { Project, Client, Activity, Page, TeamMember, Case, EnrichedTask, RecentItem } from '../types';
-import { ProjectStatus, ActivityType, ActivityStatus, TaskStatus } from '../types';
+import type { Project, Client, Activity, Page, TeamMember, Case, EnrichedTask, RecentItem, Donation } from '../types';
+import { ProjectStatus, ActivityType, ActivityStatus, TaskStatus, CaseStatus } from '../types';
 import { getDeadlineStatus } from '../utils/dateHelpers';
 import { generateDailyBriefing } from '../services/geminiService';
-// FIX: Import icons from the central icons file instead of defining them locally.
-import { BuildingIcon, UsersIcon, DollarSignIcon, TrendingUpIcon, PhoneIcon, MailIcon, DocumentTextIcon, FolderIcon, CaseIcon } from './icons';
+// FIX: Imported BuildingIcon to resolve error and provide a more appropriate icon for organizations.
+import { BriefcaseIcon, UsersIcon, CaseIcon, DonationIcon, PhoneIcon, MailIcon, DocumentTextIcon, FolderIcon, BuildingIcon } from './icons';
+import { StatCard } from './enhanced/StatCard';
 
-// FIX: Update DashboardProps to match props passed from App.tsx. Added `recentlyViewed` and replaced `setCurrentPage`/`onScheduleEvent` with `onNavigate`.
 interface DashboardProps {
   projects: Project[];
   clients: Client[];
   cases: Case[];
   activities: Activity[];
+  donations: Donation[];
   teamMembers: TeamMember[];
   recentlyViewed: RecentItem[];
   currentUserId: string;
   onSelectProject: (id: string) => void;
   onNavigate: (page: Page, id?: string) => void;
 }
-
-const StatCard: React.FC<{ title: string; value: string | number; subtitle: string; icon: React.ReactNode; color: string }> = ({ title, value, subtitle, icon, color }) => (
-  <div className="bg-white/20 dark:bg-slate-900/40 backdrop-blur-xl p-5 rounded-lg border border-white/20 shadow-lg text-shadow-strong">
-    <div className="flex justify-between items-start">
-      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{title}</p>
-      <div className={`${color}`}>
-        {icon}
-      </div>
-    </div>
-    <div>
-      <p className="text-3xl font-bold text-slate-900 mt-2 dark:text-slate-100">{value}</p>
-      <p className="text-xs text-green-800 dark:text-green-400 font-semibold">{subtitle}</p>
-    </div>
-  </div>
-);
 
 const DailyBriefing: React.FC<{
     userName: string;
@@ -171,11 +158,15 @@ const ProjectsNearingDeadline: React.FC<{ projects: Project[], onSelectProject: 
 }
 
 
-export const Dashboard: React.FC<DashboardProps> = ({ projects, clients, cases, activities, teamMembers, recentlyViewed, currentUserId, onSelectProject, onNavigate }) => {
-  const activeProjects = projects.filter(p => p.status === ProjectStatus.InProgress).length;
+export const Dashboard: React.FC<DashboardProps> = ({ projects, clients, cases, activities, donations, teamMembers, recentlyViewed, currentUserId, onSelectProject, onNavigate }) => {
   const recentActivities = activities.slice(0, 5);
   const currentUser = useMemo(() => teamMembers.find(tm => tm.id === currentUserId), [teamMembers, currentUserId]);
 
+  const totalProjects = projects.length;
+  const activeClients = clients.filter(c => c.status === 'active').length;
+  const openCases = cases.filter(c => c.status === CaseStatus.New || c.status === CaseStatus.InProgress).length;
+  const totalDonations = donations.reduce((sum, d) => sum + d.amount, 0);
+  const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' });
 
   const getClientName = (clientId: string | null | undefined) => {
       if (!clientId) return 'Internal';
@@ -221,7 +212,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, clients, cases, 
       }
   }
 
-
   return (
     <div className="space-y-8">
       <DailyBriefing 
@@ -232,11 +222,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, clients, cases, 
         currentUserId={currentUserId}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Organizations" value={clients.length} subtitle={`${clients.length} active`} icon={<BuildingIcon />} color="text-cyan-600 dark:text-cyan-400" />
-        <StatCard title="Total Contacts" value={clients.length} subtitle="All contacts" icon={<UsersIcon />} color="text-cyan-600 dark:text-cyan-400"/>
-        <StatCard title="Pipeline Value" value="$0K" subtitle="Total project value" icon={<DollarSignIcon />} color="text-cyan-600 dark:text-cyan-400"/>
-        <StatCard title="Active Projects" value={activeProjects} subtitle={`${projects.length} total projects`} icon={<TrendingUpIcon />} color="text-cyan-600 dark:text-cyan-400"/>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          title="Total Projects"
+          value={totalProjects}
+          change={12}
+          icon={<BriefcaseIcon className="w-6 h-6" />}
+          color="purple"
+          onClick={() => onNavigate('projects')}
+        />
+        <StatCard
+          title="Active Clients"
+          value={activeClients}
+          change={5}
+          // FIX: Changed icon to BuildingIcon for better representation of organizations.
+          icon={<BuildingIcon className="w-6 h-6" />}
+          color="green"
+          onClick={() => onNavigate('organizations')}
+        />
+        <StatCard
+          title="Open Cases"
+          value={openCases}
+          change={-3}
+          icon={<CaseIcon className="w-6 h-6" />}
+          color="amber"
+          onClick={() => onNavigate('case')}
+        />
+        <StatCard
+          title="Total Donations"
+          value={currencyFormatter.format(totalDonations)}
+          change={25}
+          icon={<DonationIcon className="w-6 h-6" />}
+          color="cyan"
+          onClick={() => onNavigate('donations')}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

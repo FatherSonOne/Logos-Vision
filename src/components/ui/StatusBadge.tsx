@@ -26,7 +26,7 @@ export const getStatusVariant = (status: string): BadgeVariant => {
         case CasePriority.Medium:
             return 'warning';
         
-        // Error / Pink
+        // Pink
         case CasePriority.High:
             return 'pink';
 

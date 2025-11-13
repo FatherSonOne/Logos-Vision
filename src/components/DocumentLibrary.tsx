@@ -1,7 +1,7 @@
+
 import React, { useState, useMemo } from 'react';
 import type { Document, Client, Project, TeamMember } from '../types';
 import { DocumentCategory } from '../types';
-// FIX: Import EmptyState and necessary icons.
 import { EmptyState } from './ui/EmptyState';
 import { PlusIcon, DocumentsIcon } from './icons';
 
@@ -10,7 +10,6 @@ interface DocumentLibraryProps {
     clients: Client[];
     projects: Project[];
     teamMembers: TeamMember[];
-    // FIX: Add onUploadDocument prop to handle "Upload Document" action.
     onUploadDocument: () => void;
 }
 
@@ -133,7 +132,6 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ documents, cli
     );
 };
 
-// FIX: Defined missing icon components used in the DocumentLibrary.
 const iconProps = { fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 };
 const docPath = "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
 const PdfIcon = () => <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" d={docPath} /></svg>;

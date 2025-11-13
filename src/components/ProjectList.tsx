@@ -1,78 +1,18 @@
+
 import React, { useState, useMemo } from 'react';
 import type { Project, Client } from '../types';
 import { ProjectStatus } from '../types';
 import { ProjectTimeline } from './ProjectTimeline';
-import { getDeadlineStatus } from '../utils/dateHelpers';
 import { EmptyState } from './ui/EmptyState';
+import { ProjectCard } from './enhanced/ProjectCard';
 import { FolderIcon } from './icons';
 
 interface ProjectListProps {
   projects: Project[];
   clients: Client[];
   onSelectProject: (id: string) => void;
-  // FIX: Add onCreateProject to props to handle creation from empty state.
   onCreateProject: () => void;
 }
-
-const StatusBadge: React.FC<{ status: ProjectStatus }> = ({ status }) => {
-  const colorClasses = {
-    [ProjectStatus.Planning]: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-    [ProjectStatus.InProgress]: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-    [ProjectStatus.Completed]: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300',
-    [ProjectStatus.OnHold]: 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300',
-  };
-  return (
-    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${colorClasses[status]}`}>
-      {status}
-    </span>
-  );
-};
-
-const ProjectCard: React.FC<{ project: Project; clientName: string; onSelectProject: (id: string) => void }> = ({ project, clientName, onSelectProject }) => {
-    const completionPercentage = project.tasks.length > 0
-        ? (project.tasks.filter(t => t.status === 'Done').length / project.tasks.length) * 100
-        : 0;
-    
-    const deadline = getDeadlineStatus(project.endDate, project.status === ProjectStatus.Completed);
-
-    return (
-        <div className="bg-white/20 dark:bg-slate-900/40 backdrop-blur-xl p-6 rounded-lg border border-white/20 shadow-lg flex flex-col justify-between hover:border-white/40 transition-colors duration-300 text-shadow-strong h-full">
-            <div>
-                <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">{project.name}</h3>
-                    <StatusBadge status={project.status} />
-                </div>
-                <p className="text-sm text-cyan-800 font-medium mb-3 dark:text-cyan-300">{clientName}</p>
-                <p className="text-sm text-slate-700 line-clamp-2 mb-4 dark:text-slate-200">{project.description}</p>
-                
-                <div className="flex justify-between items-center text-sm mb-4">
-                    <span className="font-semibold text-slate-700 dark:text-slate-200">Deadline</span>
-                    <span className={`flex items-center gap-1 font-semibold ${deadline.color}`}>
-                        <ClockIcon />
-                        {deadline.text}
-                    </span>
-                </div>
-
-                <div className="mb-2">
-                    <div className="flex justify-between text-xs text-slate-600 mb-1 dark:text-slate-300">
-                        <span>Progress</span>
-                        <span>{Math.round(completionPercentage)}%</span>
-                    </div>
-                    <div className="w-full bg-slate-200/50 rounded-full h-2 dark:bg-black/20">
-                        <div className="bg-gradient-to-r from-cyan-500 to-sky-500 h-2 rounded-full" style={{ width: `${completionPercentage}%` }}></div>
-                    </div>
-                </div>
-            </div>
-            
-            <button
-                onClick={() => onSelectProject(project.id)}
-                className="mt-4 w-full text-center bg-gradient-to-b from-cyan-500 to-sky-600 text-white px-4 py-2 rounded-md text-sm font-semibold border border-cyan-700/50 hover:from-cyan-600 hover:to-sky-700 transition-all shadow-md btn-hover-scale"
-            >
-                View Details
-            </button>
-        </div>
-    );
-};
 
 export const ProjectList: React.FC<ProjectListProps> = ({ projects, clients, onSelectProject, onCreateProject }) => {
   const [view, setView] = useState<'card' | 'timeline'>('card');
@@ -167,5 +107,3 @@ export const ProjectList: React.FC<ProjectListProps> = ({ projects, clients, onS
     </div>
   );
 };
-
-function ClockIcon() { return <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>; }

@@ -32,7 +32,7 @@ import { CaseManagement } from '../components/CaseManagement';
 import { DocumentLibrary } from '../components/DocumentLibrary';
 import { WebManagement } from '../components/WebManagement';
 import { GoldPages } from '../components/GoldPages';
-import { WebpageStatus, DocumentCategory, ActivityType, ActivityStatus } from './types';
+import { WebpageStatus, DocumentCategory, ActivityType, ActivityStatus, TaskStatus } from './types';
 import { AiChatBot } from '../components/AiChatBot';
 import { AiTools } from '../components/AiTools';
 import { LiveChat } from '../components/LiveChat';
@@ -53,7 +53,6 @@ import { ToastProvider, useToast } from './components/ui/Toast';
 import { CommandPalette, type Command } from './components/ui/CommandPalette';
 import { KeyboardShortcuts } from './components/ui/KeyboardShortcuts';
 import { allNavItems } from '../components/navigationConfig';
-// FIX: Import missing icons used in command palette commands.
 import { PlusIcon, MoonIcon, SunIcon, QuestionMarkCircleIcon } from '../components/icons';
 
 const AppContent: React.FC = () => {
@@ -354,6 +353,7 @@ const AppContent: React.FC = () => {
         ...newContact,
         id: `cl-${Date.now()}`,
         createdAt: new Date().toISOString(),
+        status: 'prospect', // Default status for new contacts
     };
     setClients(prev => [...prev, contactWithId]);
     setIsAddContactDialogOpen(false);
@@ -454,6 +454,37 @@ const AppContent: React.FC = () => {
     );
     showToast('Task note saved!', 'success');
   };
+  
+  const handleUpdateProjectField = (projectId: string, field: keyof Project, value: any) => {
+    setProjects(prev => prev.map(p => 
+        p.id === projectId ? { ...p, [field]: value } : p
+    ));
+    showToast(`Project ${field as string} updated!`, 'success');
+  };
+
+  const handleUpdateClientField = (clientId: string, field: keyof Client, value: any) => {
+    setClients(prev => prev.map(c => 
+        c.id === clientId ? { ...c, [field]: value } : c
+    ));
+    showToast(`Organization ${field as string} updated!`, 'success');
+  };
+
+  const handleBulkDeleteTasks = (taskIds: string[]) => {
+    setProjects(prevProjects => prevProjects.map(p => ({
+      ...p,
+      tasks: p.tasks.filter(t => !taskIds.includes(t.id))
+    })));
+    showToast(`${taskIds.length} task(s) deleted.`, 'success');
+  };
+  
+  const handleBulkUpdateTasksStatus = (taskIds: string[], status: TaskStatus) => {
+    setProjects(prevProjects => prevProjects.map(p => ({
+      ...p,
+      tasks: p.tasks.map(t => taskIds.includes(t.id) ? { ...t, status } : t)
+    })));
+    showToast(`${taskIds.length} task(s) updated to "${status}".`, 'success');
+  };
+
 
   // --- Placeholder Action Handlers for Empty States ---
   const handleCreateProject = () => {
@@ -630,6 +661,7 @@ const AppContent: React.FC = () => {
               cases={projectCases}
               onBack={handleBackToList}
               onUpdateTaskNote={handleUpdateTaskNote}
+              onUpdateField={handleUpdateProjectField}
             />
         }
     }
@@ -667,6 +699,7 @@ const AppContent: React.FC = () => {
                 onBack={handleBackFromOrganizations}
                 onSelectProject={handleSelectProject}
                 onScheduleActivity={handleScheduleActivity}
+                onUpdateClientField={handleUpdateClientField}
              />
         }
     }
@@ -679,6 +712,7 @@ const AppContent: React.FC = () => {
                   clients={clients} 
                   cases={cases}
                   activities={activities}
+                  donations={donations}
                   teamMembers={teamMembers}
                   currentUserId={currentUserId}
                   onSelectProject={handleSelectProject}
@@ -717,7 +751,13 @@ const AppContent: React.FC = () => {
       case 'calendar': 
         return <CalendarView teamMembers={teamMembers} projects={projects} activities={activities} />;
       case 'tasks': 
-        return <TaskView projects={projects} teamMembers={teamMembers} onSelectTask={handleSelectProject} />;
+        return <TaskView 
+                  projects={projects} 
+                  teamMembers={teamMembers} 
+                  onSelectTask={handleSelectProject}
+                  onBulkDelete={handleBulkDeleteTasks}
+                  onBulkUpdateStatus={handleBulkUpdateTasksStatus}
+               />;
       case 'form-generator':
         return <FormGenerator clients={clients} />;
       case 'grant-assistant':
@@ -832,6 +872,7 @@ const AppContent: React.FC = () => {
                   clients={clients} 
                   cases={cases}
                   activities={activities}
+                  donations={donations}
                   teamMembers={teamMembers}
                   currentUserId={currentUserId}
                   onSelectProject={handleSelectProject}

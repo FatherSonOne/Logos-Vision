@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import type { Client, Project, Activity, Case, Donation, Document, TeamMember, Event } from '../types';
 import { ProjectStatus, CaseStatus, ActivityType } from '../types';
 import { generateDonorInsights, DonorInsightsResult } from '../services/geminiService';
-// FIX: Corrected the import path for the Breadcrumbs component.
 import { Breadcrumbs } from './ui/Breadcrumbs';
+import { InlineEdit } from './editing/InlineEdit';
 
 interface OrganizationDetailProps {
   client: Client;
@@ -17,6 +17,7 @@ interface OrganizationDetailProps {
   onBack: () => void;
   onSelectProject: (id: string) => void;
   onScheduleActivity: (activity: Partial<Activity>) => void;
+  onUpdateClientField: (clientId: string, field: keyof Client, value: any) => void;
 }
 
 const StatCard: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
@@ -40,7 +41,7 @@ const TabButton: React.FC<{ active: boolean; onClick: () => void; children: Reac
 );
 
 
-export const OrganizationDetail: React.FC<OrganizationDetailProps> = ({ client, projects, activities, cases, donations, documents, teamMembers, events, onBack, onSelectProject, onScheduleActivity }) => {
+export const OrganizationDetail: React.FC<OrganizationDetailProps> = ({ client, projects, activities, cases, donations, documents, teamMembers, events, onBack, onSelectProject, onScheduleActivity, onUpdateClientField }) => {
     const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'cases' | 'activities' | 'donations' | 'documents'>('overview');
     const [donorInsights, setDonorInsights] = useState<DonorInsightsResult | null>(null);
     const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
@@ -164,15 +165,19 @@ export const OrganizationDetail: React.FC<OrganizationDetailProps> = ({ client, 
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between sm:items-start border-b border-slate-200 pb-6 mb-6 dark:border-slate-700">
                     <div>
-                        <h2 className="text-3xl font-bold text-slate-900 mb-2 dark:text-slate-100">{client.name}</h2>
+                        <InlineEdit
+                            value={client.name}
+                            onSave={newValue => onUpdateClientField(client.id, 'name', newValue)}
+                            className="text-3xl font-bold text-slate-900 mb-2 dark:text-slate-100"
+                        />
                         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
-                            <span><strong>Contact:</strong> {client.contactPerson}</span>
-                            <span><strong>Email:</strong> {client.email}</span>
-                            <span><strong>Phone:</strong> {client.phone}</span>
+                            <span><strong>Contact:</strong> <InlineEdit value={client.contactPerson} onSave={newValue => onUpdateClientField(client.id, 'contactPerson', newValue)} /></span>
+                            <span><strong>Email:</strong> <InlineEdit value={client.email} onSave={newValue => onUpdateClientField(client.id, 'email', newValue)} /></span>
+                            <span><strong>Phone:</strong> <InlineEdit value={client.phone} onSave={newValue => onUpdateClientField(client.id, 'phone', newValue)} /></span>
                         </div>
                     </div>
                     <div className="mt-4 sm:mt-0 text-sm text-slate-500 dark:text-slate-400 text-right">
-                        <p><strong>Location:</strong> {client.location}</p>
+                        <p><strong>Location:</strong> <InlineEdit value={client.location} onSave={newValue => onUpdateClientField(client.id, 'location', newValue)} /></p>
                         <p><strong>Client Since:</strong> {new Date(client.createdAt).toLocaleDateString()}</p>
                     </div>
                 </div>

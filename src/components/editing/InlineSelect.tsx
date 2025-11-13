@@ -1,14 +1,13 @@
-
 import React, { useState, useEffect, useRef } from 'react';
+import { getStatusVariant, BadgeVariant, StatusBadge } from '../ui/StatusBadge';
 
 interface InlineSelectProps {
   value: string;
   options: { value: string; label: string }[];
   onSave: (value: string) => void;
-  className?: string;
 }
 
-export const InlineSelect: React.FC<InlineSelectProps> = ({ value, options, onSave, className }) => {
+export const InlineSelect: React.FC<InlineSelectProps> = ({ value, options, onSave }) => {
   const [isEditing, setIsEditing] = useState(false);
   const selectRef = useRef<HTMLSelectElement>(null);
 
@@ -19,7 +18,9 @@ export const InlineSelect: React.FC<InlineSelectProps> = ({ value, options, onSa
   }, [isEditing]);
   
   const handleSave = (newValue: string) => {
-    onSave(newValue);
+    if (newValue !== value) {
+        onSave(newValue);
+    }
     setIsEditing(false);
   };
 
@@ -30,18 +31,19 @@ export const InlineSelect: React.FC<InlineSelectProps> = ({ value, options, onSa
         value={value}
         onChange={(e) => handleSave(e.target.value)}
         onBlur={() => setIsEditing(false)}
-        className={`bg-white/80 dark:bg-black/50 p-1 -m-1 rounded-md focus:outline-none focus:ring-2 ring-cyan-500 ${className}`}
+        className="bg-white/80 dark:bg-black/50 p-1 rounded-md focus:outline-none focus:ring-2 ring-cyan-500 text-xs font-semibold"
       >
         {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
       </select>
     );
   }
 
-  const currentLabel = options.find(o => o.value === value)?.label || value;
+  const currentOption = options.find(o => o.value === value);
+  const variant = getStatusVariant(value);
 
   return (
-    <span onClick={() => setIsEditing(true)} className={`hover:bg-white/50 dark:hover:bg-black/30 p-1 -m-1 rounded-md cursor-pointer ${className}`}>
-      {currentLabel}
-    </span>
+    <button onClick={() => setIsEditing(true)} className="hover:ring-2 ring-cyan-500 rounded-full transition-all">
+        <StatusBadge label={currentOption?.label || value} variant={variant} />
+    </button>
   );
 };

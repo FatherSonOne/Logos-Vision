@@ -12,6 +12,8 @@ export enum TaskStatus {
   Done = 'Done',
 }
 
+export type ClientStatus = 'active' | 'inactive' | 'prospect';
+
 export interface TeamMember {
   id: string;
   name: string;
@@ -27,6 +29,7 @@ export interface Client {
   phone: string;
   location: string;
   createdAt: string; // ISO String
+  status: ClientStatus;
 }
 
 export interface Task {
@@ -42,7 +45,7 @@ export interface Task {
 export interface Project {
   id:string;
   name: string;
-  description: string;
+  description?: string;
   clientId: string;
   teamMemberIds: string[];
   startDate: string;

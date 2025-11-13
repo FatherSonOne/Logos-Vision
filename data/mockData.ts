@@ -1,3 +1,4 @@
+
 import { Client, TeamMember, Project, ProjectStatus, TaskStatus, Activity, ActivityType, ActivityStatus, ChatRoom, ChatMessage, Donation, Volunteer, Case, CaseStatus, CasePriority, Document, DocumentCategory, Webpage, WebpageStatus, WebpageComponentType, Event, PortalLayout, EmailCampaign } from '../types';
 
 export const mockTeamMembers: TeamMember[] = [
@@ -16,18 +17,19 @@ export const mockTeamMembers: TeamMember[] = [
 ];
 
 export const mockClients: Client[] = [
-  { id: 'cl1', name: 'Global Health Initiative', contactPerson: 'Dr. Emily Carter', email: 'ecarter@ghi.org', phone: '555-0101', location: 'New York, NY', createdAt: '2023-01-15T10:00:00Z' },
-  { id: 'cl2', name: 'Community Arts Foundation', contactPerson: 'Markus Reid', email: 'mreid@caf.org', phone: '555-0102', location: 'San Francisco, CA', createdAt: '2022-11-20T14:30:00Z' },
-  { id: 'cl3', name: 'Youth Empowerment Network', contactPerson: 'Sarah Chen', email: 'schen@yen.org', phone: '555-0103', location: 'Chicago, IL', createdAt: '2023-05-10T09:00:00Z' },
-  { id: 'cl4', name: 'Green Future Alliance', contactPerson: 'David Lee', email: 'dlee@gfa.org', phone: '555-0104', location: 'Austin, TX', createdAt: '2023-08-22T11:00:00Z' },
-  { id: 'cl5', name: 'Literacy for All', contactPerson: 'Maria Garcia', email: 'mgarcia@lfa.org', phone: '555-0105', location: 'Miami, FL', createdAt: '2024-01-05T16:20:00Z' },
-  { id: 'cl6', name: 'Animal Rescue Shelter', contactPerson: 'Tom Harris', email: 'tharris@ars.org', phone: '555-0106', location: 'Denver, CO', createdAt: '2024-03-12T08:45:00Z' },
-  { id: 'cl7', name: 'Hope for Paws Shelter', contactPerson: 'Jessica Day', email: 'jday@hfp.org', phone: '555-0107', location: 'Los Angeles, CA', createdAt: '2024-04-01T10:00:00Z' },
-  { id: 'cl8', name: 'Future Coders Initiative', contactPerson: 'Winston Schmidt', email: 'wschmidt@fci.org', phone: '555-0108', location: 'Seattle, WA', createdAt: '2024-02-18T11:30:00Z' },
-  { id: 'cl9', name: 'Urban Garden Project', contactPerson: 'Nick Miller', email: 'nmiller@ugp.org', phone: '555-0109', location: 'Portland, OR', createdAt: '2023-12-01T09:00:00Z' },
-  { id: 'cl10', name: 'Senior Support Services', contactPerson: 'Cecelia Parekh', email: 'cparekh@sss.org', phone: '555-0110', location: 'Boston, MA', createdAt: '2024-05-20T14:00:00Z' },
-  { id: 'cl11', name: 'Clean Ocean Collective', contactPerson: 'Paul Genzlinger', email: 'paul@coc.org', phone: '555-0111', location: 'San Diego, CA', createdAt: '2024-06-11T13:00:00Z' },
-  { id: 'cl12', name: 'Global Arts Exchange', contactPerson: 'Reagan Lucas', email: 'rlucas@gae.org', phone: '555-0112', location: 'New Orleans, LA', createdAt: '2024-07-01T15:00:00Z' },
+  // FIX: Added missing 'status' property to all client objects.
+  { id: 'cl1', name: 'Global Health Initiative', contactPerson: 'Dr. Emily Carter', email: 'ecarter@ghi.org', phone: '555-0101', location: 'New York, NY', createdAt: '2023-01-15T10:00:00Z', status: 'active' },
+  { id: 'cl2', name: 'Community Arts Foundation', contactPerson: 'Markus Reid', email: 'mreid@caf.org', phone: '555-0102', location: 'San Francisco, CA', createdAt: '2022-11-20T14:30:00Z', status: 'active' },
+  { id: 'cl3', name: 'Youth Empowerment Network', contactPerson: 'Sarah Chen', email: 'schen@yen.org', phone: '555-0103', location: 'Chicago, IL', createdAt: '2023-05-10T09:00:00Z', status: 'active' },
+  { id: 'cl4', name: 'Green Future Alliance', contactPerson: 'David Lee', email: 'dlee@gfa.org', phone: '555-0104', location: 'Austin, TX', createdAt: '2023-08-22T11:00:00Z', status: 'active' },
+  { id: 'cl5', name: 'Literacy for All', contactPerson: 'Maria Garcia', email: 'mgarcia@lfa.org', phone: '555-0105', location: 'Miami, FL', createdAt: '2024-01-05T16:20:00Z', status: 'inactive' },
+  { id: 'cl6', name: 'Animal Rescue Shelter', contactPerson: 'Tom Harris', email: 'tharris@ars.org', phone: '555-0106', location: 'Denver, CO', createdAt: '2024-03-12T08:45:00Z', status: 'active' },
+  { id: 'cl7', name: 'Hope for Paws Shelter', contactPerson: 'Jessica Day', email: 'jday@hfp.org', phone: '555-0107', location: 'Los Angeles, CA', createdAt: '2024-04-01T10:00:00Z', status: 'active' },
+  { id: 'cl8', name: 'Future Coders Initiative', contactPerson: 'Winston Schmidt', email: 'wschmidt@fci.org', phone: '555-0108', location: 'Seattle, WA', createdAt: '2024-02-18T11:30:00Z', status: 'active' },
+  { id: 'cl9', name: 'Urban Garden Project', contactPerson: 'Nick Miller', email: 'nmiller@ugp.org', phone: '555-0109', location: 'Portland, OR', createdAt: '2023-12-01T09:00:00Z', status: 'active' },
+  { id: 'cl10', name: 'Senior Support Services', contactPerson: 'Cecelia Parekh', email: 'cparekh@sss.org', phone: '555-0110', location: 'Boston, MA', createdAt: '2024-05-20T14:00:00Z', status: 'active' },
+  { id: 'cl11', name: 'Clean Ocean Collective', contactPerson: 'Paul Genzlinger', email: 'paul@coc.org', phone: '555-0111', location: 'San Diego, CA', createdAt: '2024-06-11T13:00:00Z', status: 'active' },
+  { id: 'cl12', name: 'Global Arts Exchange', contactPerson: 'Reagan Lucas', email: 'rlucas@gae.org', phone: '555-0112', location: 'New Orleans, LA', createdAt: '2024-07-01T15:00:00Z', status: 'prospect' },
 ];
 
 export const mockProjects: Project[] = [
